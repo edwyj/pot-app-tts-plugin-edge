@@ -210,6 +210,10 @@ bytes of audio with no error. [SRC] `communicate.py:50-71`, `510-522`
 
 [SRC] `communicate.py:263-285`
 
+The prosody values shown are the reference defaults. The plugin varies them
+from user configuration — see §10.3 for the tier mapping and the citation for
+the value formats. Every other part of the shape is fixed.
+
 The voice must be given in **long form**:
 `Microsoft Server Speech Text to Speech Voice (en-US, EmmaMultilingualNeural)`.
 The transform from the short name is explicit in `data_classes.py:55-66`,
@@ -359,6 +363,9 @@ service**, with `crypto-js` as the real CryptoJS implementation and a
 | Emoji / multibyte split safety | OK |
 | Empty and whitespace-only input | throws a clear error |
 
+The configuration surface added later was verified the same way, in
+`test_config.js` — see §10.5.
+
 One harness note worth keeping: evaling the plugin at **module top level**
 fails with `Identifier 'tts' has already been declared`, because in sloppy
 mode the plugin's `function tts` declaration collides with a caller-side
@@ -395,3 +402,132 @@ translated into this plugin, that assessment must be revisited.
    not specified. It is isolated in one place in `main.js` to make it easy to
    revise.
 5. Text is sent to **Microsoft's servers**; this is not local synthesis.
+6. **Four catalog voices are unreachable** — the Inuktitut names carrying a
+   script subtag. See §10.4.
+
+---
+
+## 10. User-facing configuration
+
+### 10.1 What Pot can render
+
+`info.json`'s `needs` array is the only place a plugin declares configuration,
+and exactly two control types render:
+
+| `type` | Rendered as | Stored value |
+|---|---|---|
+| `input` | a text `Input` | the string typed |
+| `select` | a NextUI `Dropdown` | **the option key** |
+
+Anything else renders as nothing at all.
+[SRC] `src/window/Config/pages/Service/PluginConfig/index.jsx:52-98`
+
+Three properties of `select` shape this design:
+
+1. **The stored value is the key, not the label.** `options` is a
+   `{key: label}` object and `onAction` stores the key. [SRC] same file, `:84`
+2. **A stored key that no longer exists renders `undefined`.** The trigger
+   reads `x.options[pluginConfig[x.key]]` with no fallback, so renaming an
+   option key in a later release breaks the display for everyone who had picked
+   it. Option keys are a compatibility surface: **never rename one after
+   release.** [SRC] `:79`
+3. **Before the user touches a control its key is absent**, and the trigger
+   then displays `Object.keys(x.options)[0]`'s label. So **the first option
+   must be the plugin's real default** — otherwise the UI shows one thing while
+   the plugin does another. [SRC] `:78`
+
+There is also a JavaScript ordering trap: `Object.keys()` moves integer-like
+keys to the front in ascending numeric order regardless of insertion order, so
+a `{"-25": …, "0": …}` options object does not render as written. **[EXP]**
+verified with `node` — `{"-25":…,"0":…,"15":…,"35":…}` yields
+`["0","15","35","-25"]`. Every option key here is a word (`slow`, `normal`).
+
+The dropdown is **not searchable**, and its menu is height-capped
+(`max-h-[40vh] overflow-y-auto`). The live catalog holds **322 voices across
+142 locales** [EXP] `_scratch_verify/voices.json`, so a complete list is not
+usable in this control — hence a curated list plus a free-text escape hatch.
+
+### 10.2 The five controls
+
+| key | type | first option | notes |
+|---|---|---|---|
+| `voice` | `select` | `auto` | 25 curated voices: one per supported language, plus `en-US-Andrew` and `zh-CN-Yunxi` |
+| `voiceCustom` | `input` | — | overrides `voice` when non-empty |
+| `rate` | `select` | `normal` | |
+| `pitch` | `select` | `normal` | |
+| `volume` | `select` | `normal` | |
+
+Labels are in Chinese because this deployment targets a Chinese-language Pot
+install; only `display` strings inside `needs` are affected.
+
+`info.json`'s `language` map has 25 keys but only 23 distinct values
+(`mn_cy`/`mn_mo` both map to `mn-MN`; `nb_no`/`nn_no` both to `nb-NO`). Since
+Pot passes the map's *value* through as `lang`, each of those 23 codes has an
+entry in the automatic voice table.
+
+### 10.3 Resolution rules
+
+Voice, in priority order:
+
+1. `voiceCustom`, when non-empty;
+2. `voice`, when present and not `auto`;
+3. the automatic table for `lang`;
+4. otherwise `en-US-EmmaMultilingualNeural`.
+
+Rate, pitch and volume map a tier to an SSML value. `normal` is deliberately
+**absent** from the tables: it and any unrecognised key fall back to the
+neutral value, so a stale stored key degrades quietly instead of failing.
+
+| tier suffix | rate | pitch | volume |
+|---|---|---|---|
+| `slower` / `slightLow` / `slightQuiet` | `-20%` | `-8Hz` | `-25%` |
+| `slow` / `low` / `quiet` | `-40%` | `-16Hz` | `-50%` |
+| `faster` / `slightHigh` / `slightLoud` | `+25%` | `+8Hz` | `+25%` |
+| `fast` / `high` / `loud` | `+50%` | `+16Hz` | `+50%` |
+
+The value formats follow the reference client's CLI defaults — `+0%` for rate
+and volume, `+0Hz` for pitch, each optionally signed.
+[SRC] `util.py:108-110`
+
+`xml:lang` stays hardcoded to `en-US` for every voice. The reference does the
+same, and pronunciation follows the voice's own locale, not this attribute.
+
+### 10.4 The custom voice box
+
+A typed voice must be one `_edgeVoiceName` can expand, i.e. match
+`^[a-z]{2,}-[A-Z]{2,}-.+Neural$`. Four of the 322 catalog voices are Inuktitut
+names carrying a **script subtag** (`iu-Latn-CA-SiqiniqNeural`,
+`iu-Cans-CA-…`). The long-name form for those is not known, so they are
+**refused with a readable error** rather than sent as a guess that would fail
+opaquely — the handshake offers no diagnostics (§9.3). 318 of 322 pass,
+including the hyphenated-region form `zh-CN-liaoning-XiaobeiNeural` →
+`Microsoft Server Speech Text to Speech Voice (zh-CN-liaoning, XiaobeiNeural)`.
+
+The check runs before any socket is opened, so a typo costs no network round
+trip. It cannot tell whether a well-formed name *exists*; the service is the
+only authority on that, and an unknown-but-well-formed voice fails with the
+same opaque handshake error as any other rejection.
+
+### 10.5 Verification
+
+**[EXP]** `_scratch_verify/test_config.js` drives the real `main.js` through
+the same Pot-shaped loader described in §7.1, and captures the **SSML frame
+actually sent on the wire** instead of inferring success from audio length.
+12/12 passed:
+
+| Case | Result |
+|---|---|
+| `config` absent, `{}`, and partial | neutral prosody, correct automatic voice |
+| automatic voice for `en-US` / `zh-CN` / `ja-JP` | `Emma` / `Xiaoxiao` / `Keita`, as sent |
+| dropdown overrides the automatic table | Andrew on `zh-CN` text, not 晓晓 |
+| `voiceCustom` overrides the dropdown | 云希 won |
+| all three tiers at once | `pitch='+16Hz' rate='-40%' volume='-50%'` accepted, MP3 returned |
+| unrecognised tier key | fell back to neutral, no failure |
+| unknown language code | fell back to `en-US` |
+| invalid voice name | rejected locally, **no socket opened** |
+| `iu-Latn-CA-SiqiniqNeural` | rejected locally, no socket opened |
+| `zh-CN-liaoning-XiaobeiNeural` | expanded and synthesized |
+
+That the tiers reach the *service* — not merely the frame — is shown by
+duration: on identical text, `rate=-40%` encoded to **37,152 bytes** against
+**22,176** at neutral, a ratio of 1.675.

@@ -12,9 +12,8 @@ Drop in the `.potext` and it works.
 
 ## Status
 
-MVP. Fixed to one English voice (`en-US-EmmaMultilingualNeural`) at normal
-rate, pitch, and volume. Voice selection, rate/pitch/volume controls, and
-automatic language→voice mapping are not implemented yet.
+Works. Voice, rate, pitch and volume are configurable, and a suitable voice is
+chosen automatically for the translation's target language.
 
 ## Platform support
 
@@ -44,6 +43,27 @@ Pot window, or import it from Pot's plugin settings.
 After installing, enable it in **Settings → Service → Text to Speech**, then
 use the speaker button on any translation result.
 
+## Configuration
+
+The controls appear in that same **Settings → Service → Text to Speech** panel.
+
+| Control | Effect |
+|---|---|
+| 音色 — Voice | One of 25 curated voices. The default, 自动（按语言）, picks one from the translation's target language. |
+| 自定义音色 — Custom voice | A voice short name such as `de-DE-KatjaNeural`. When filled in it **overrides** the dropdown. |
+| 语速 / 音调 / 音量 | Rate / pitch / volume, five tiers each. |
+
+The custom box is the escape hatch for the rest of the catalog: the service
+offers **322 voices across 142 locales**, far more than a non-searchable
+dropdown can hold. Names must look like
+`<language>-<REGION>-<Name>Neural`. The four Inuktitut voices carrying a script
+subtag (`iu-Latn-CA-SiqiniqNeural`) are rejected — the long name the service
+expects for those is not known, so sending one would fail with no diagnostic.
+
+**Option keys are permanent.** Pot stores the key rather than the label, and a
+stored key that no longer exists renders as `undefined` in the UI. None of them
+can be renamed after release. See `docs/DESIGN.md` §10.
+
 ## Build
 
 ```powershell
@@ -62,6 +82,10 @@ are identical.
 - The Edge protocol lives in one marked block at the top of `main.js`. That
   block is the only part expected to change when Microsoft updates the
   service.
+- User options are declared in `info.json`'s `needs` and resolved in the
+  "User options" block of `main.js`. Two rules there are load-bearing: the
+  first option of every `select` must be the plugin's real default, and option
+  keys must never be renamed. See `docs/DESIGN.md` §10.1.
 - `docs/DESIGN.md` documents the plugin contract, the Pot runtime, the Edge
   Read Aloud protocol, and how each claim was verified.
 

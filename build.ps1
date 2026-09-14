@@ -8,7 +8,11 @@
 $ErrorActionPreference = 'Stop'
 
 $root = $PSScriptRoot
-$info = Get-Content (Join-Path $root 'info.json') -Raw | ConvertFrom-Json
+# -Encoding UTF8 is load-bearing. Windows PowerShell 5.1 reads a BOM-less file
+# using the system ANSI code page, which turns the non-ASCII control labels in
+# info.json into mojibake and breaks the JSON parse. It is harmless on
+# PowerShell 7+, which already defaults to UTF-8.
+$info = Get-Content (Join-Path $root 'info.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $id = $info.id
 $icon = $info.icon
 

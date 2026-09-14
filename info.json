@@ -4,7 +4,82 @@
   "icon": "edge.svg",
   "display": "Edge Read Aloud",
   "homepage": "https://github.com/pot-app/pot-app-tts-plugin-edge",
-  "needs": [],
+  "needs": [
+    {
+      "key": "voice",
+      "display": "音色",
+      "type": "select",
+      "options": {
+        "auto": "自动（按语言）",
+        "en-US-EmmaMultilingualNeural": "英文 · Emma（女）",
+        "en-US-AndrewMultilingualNeural": "英文 · Andrew（男）",
+        "zh-CN-XiaoxiaoNeural": "中文(简) · 晓晓（女）",
+        "zh-CN-YunxiNeural": "中文(简) · 云希（男）",
+        "zh-TW-HsiaoChenNeural": "中文(繁) · 曉臻（女）",
+        "ja-JP-KeitaNeural": "日文 · Keita（男）",
+        "ko-KR-HyunsuMultilingualNeural": "韩文 · Hyunsu（男）",
+        "fr-FR-VivienneMultilingualNeural": "法语 · Vivienne（女）",
+        "es-ES-XimenaNeural": "西语 · Ximena（女）",
+        "ru-RU-DmitryNeural": "俄语 · Dmitry（男）",
+        "de-DE-SeraphinaMultilingualNeural": "德语 · Seraphina（女）",
+        "it-IT-GiuseppeMultilingualNeural": "意语 · Giuseppe（男）",
+        "tr-TR-EmelNeural": "土耳其语 · Emel（女）",
+        "pt-PT-DuarteNeural": "葡语(葡) · Duarte（男）",
+        "pt-BR-ThalitaMultilingualNeural": "葡语(巴) · Thalita（女）",
+        "vi-VN-HoaiMyNeural": "越南语 · HoaiMy（女）",
+        "id-ID-ArdiNeural": "印尼语 · Ardi（男）",
+        "th-TH-NiwatNeural": "泰语 · Niwat（男）",
+        "ms-MY-OsmanNeural": "马来语 · Osman（男）",
+        "ar-SA-HamedNeural": "阿拉伯语 · Hamed（男）",
+        "hi-IN-MadhurNeural": "印地语 · Madhur（男）",
+        "mn-MN-BataaNeural": "蒙古语 · Bataa（男）",
+        "km-KH-PisethNeural": "高棉语 · Piseth（男）",
+        "nb-NO-FinnNeural": "挪威语 · Finn（男）",
+        "fa-IR-DilaraNeural": "波斯语 · Dilara（女）"
+      }
+    },
+    {
+      "key": "voiceCustom",
+      "display": "自定义音色",
+      "type": "input"
+    },
+    {
+      "key": "rate",
+      "display": "语速",
+      "type": "select",
+      "options": {
+        "normal": "正常",
+        "slower": "稍慢",
+        "slow": "慢",
+        "faster": "稍快",
+        "fast": "快"
+      }
+    },
+    {
+      "key": "pitch",
+      "display": "音调",
+      "type": "select",
+      "options": {
+        "normal": "正常",
+        "slightLow": "稍低",
+        "low": "低",
+        "slightHigh": "稍高",
+        "high": "高"
+      }
+    },
+    {
+      "key": "volume",
+      "display": "音量",
+      "type": "select",
+      "options": {
+        "normal": "正常",
+        "slightQuiet": "稍小",
+        "quiet": "小",
+        "slightLoud": "稍大",
+        "loud": "大"
+      }
+    }
+  ],
   "language": {
     "zh_cn": "zh-CN",
     "zh_tw": "zh-TW",
