@@ -2,8 +2,8 @@
   "id": "plugin.com.pot-app.edge_read_aloud_tts",
   "plugin_type": "tts",
   "icon": "edge.svg",
-  "display": "Edge Read Aloud",
-  "homepage": "https://github.com/pot-app/pot-app-tts-plugin-edge",
+  "display": "Edge Read Aloud (Windows)",
+  "homepage": "https://github.com/edwyj/pot-app-tts-plugin-edge",
   "needs": [
     {
       "key": "voice",
