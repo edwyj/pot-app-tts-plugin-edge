@@ -1,3 +1,5 @@
+[English](./README.md) | [中文](./README.zh-CN.md)
+
 # pot-app-tts-plugin-edge
 
 A self-contained [Pot](https://github.com/pot-app/pot-desktop) text-to-speech
