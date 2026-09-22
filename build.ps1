@@ -4,7 +4,10 @@
 # (pot-desktop src-tauri/src/cmd.rs:141) and get_plugin_list silently DELETES
 # any plugin directory that does not (src-tauri/src/config.rs:160).
 #
-# Mirrors .github/workflows/build.yml so local and CI artifacts match.
+# Mirrors .github/workflows/build.yml: both put the same three files in, so the
+# two artifacts hold identical *contents*. They are not byte-identical -- this
+# uses Compress-Archive, CI uses vimtor/action-zip, and the two differ in
+# compression and stored timestamps. Compare extracted contents, not hashes.
 $ErrorActionPreference = 'Stop'
 
 $root = $PSScriptRoot

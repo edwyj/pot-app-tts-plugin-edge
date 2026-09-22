@@ -31,17 +31,20 @@ passes) but WebKit elsewhere (which does not). See `docs/DESIGN.md` §6.
 
 ## Install
 
-Build the package:
-
-```powershell
-./build.ps1
-```
-
-Then either drag `dist/plugin.com.pot-app.edge_read_aloud_tts.potext` onto the
-Pot window, or import it from Pot's plugin settings.
+Download `plugin.com.pot-app.edge_read_aloud_tts.potext` from the [latest
+release](https://github.com/edwyj/pot-app-tts-plugin-edge/releases/latest), then
+either drag it onto the Pot window, or import it from Pot's plugin settings.
 
 After installing, enable it in **Settings → Service → Text to Speech**, then
 use the speaker button on any translation result.
+
+> **Not in the official plugin list.** The `pot-app` organisation — including
+> `pot-desktop`, the plugin templates and `pot-app-plugin-list` — is archived on
+> GitHub, and archived repositories cannot accept pull requests or new issues.
+> This plugin is distributed from this repository's releases instead. Pot itself
+> still works, and installing a plugin works the same way either way.
+
+To build from source instead, see [Build](#build).
 
 ## Configuration
 
@@ -70,8 +73,11 @@ can be renamed after release. See `docs/DESIGN.md` §10.
 ./build.ps1          # -> dist/<plugin-id>.potext
 ```
 
-`build.ps1` mirrors `.github/workflows/build.yml`, so local and CI artifacts
-are identical.
+`build.ps1` mirrors `.github/workflows/build.yml`: both package the same three
+files, so the two artifacts hold identical **contents**. They are not
+byte-identical — the local build uses `Compress-Archive`, CI uses
+`vimtor/action-zip`, and the two differ in compression and stored timestamps.
+Compare extracted contents, not file hashes.
 
 ## Development notes
 
