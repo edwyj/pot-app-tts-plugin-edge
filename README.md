@@ -48,6 +48,32 @@ use the speaker button on any translation result.
 
 To build from source instead, see [Build](#build).
 
+## Troubleshooting
+
+**"Could not connect to Microsoft Edge Read Aloud."**
+
+That message covers every handshake failure, so on its own it says little. By
+far the most likely cause is that **Microsoft moved the service**. In October
+2026 synthesis moved from `speech.platform.bing.com` to
+`api.msedgeservices.com`, and every client pointing at the old host broke
+overnight. When that happens the fix is a new plugin release — so **check for a
+newer [release](https://github.com/edwyj/pot-app-tts-plugin-edge/releases/latest)
+and reinstall before investigating anything else.**
+
+Two things that look like diagnostics but are not:
+
+- **Whether other Edge TTS tools work.** They break together with this plugin,
+  so they tell you nothing about it either way.
+- **Whether the voice list still loads.** The voice catalog and the synthesis
+  socket are separate services on the old host, and only synthesis moved. A
+  working voice list says nothing about whether synthesis works.
+
+If you are already on the latest release and it still fails, the ordinary
+causes apply: the network has to allow a `wss://` connection to
+`api.msedgeservices.com`, and the system clock must be within a few minutes of
+real time, because each request is signed with a timestamp. This plugin is
+**Windows-only** either way — see [Platform support](#platform-support).
+
 ## Configuration
 
 The controls appear in that same **Settings → Service → Text to Speech** panel.
