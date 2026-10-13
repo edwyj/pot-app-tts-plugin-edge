@@ -165,15 +165,28 @@ Reference: `edge-tts-reference/`, LGPLv3.
 ### 4.1 Endpoint and authentication
 
 ```
-wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1
+wss://api.msedgeservices.com/tts/cognitiveservices/websocket/v1
 ```
 
 [SRC] `src/edge_tts/constants.py:3-7`
 
-Query params: `TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4`,
+Query params: `Ocp-Apim-Subscription-Key=6A5AA1D4EAFF4E9FB37E23D68491D6F4`,
 `ConnectionId=<32 hex, no dashes>`, `Sec-MS-GEC=<signed token>`,
 `Sec-MS-GEC-Version=1-143.0.3650.75`.
 [SRC] `src/edge_tts/drm.py:102-134`, `constants.py:11-13`, `communicate.py:466-468`
+
+> **Migrated October 2026.** The former endpoint,
+> `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1`,
+> began answering **403 for every synthesis request** — first outside the US,
+> then from 12 October 2026 in the US as well. The rejection happens before
+> the token is examined, so a valid and a garbage token return the same 403.
+> **The voice catalog on the old host still works** (`voices/list` returns 200
+> with the same token), which is why only synthesis broke.
+>
+> The new host accepts the *same* `6A5AA1D4EAFF4E9FB37E23D68491D6F4` value, but
+> the parameter it is passed under must be renamed from `TrustedClientToken` to
+> `Ocp-Apim-Subscription-Key`. `Sec-MS-GEC` and `Sec-MS-GEC-Version` are still
+> required; the value of `Sec-MS-GEC-Version` is not itself checked.
 
 The only real authentication is the derived **`Sec-MS-GEC`** token. There are
 no user credentials. It is a **plain SHA-256**, which is why `CryptoJS`

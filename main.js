@@ -17,8 +17,12 @@
 // ===========================================================================
 var EDGE_TRUSTED_CLIENT_TOKEN = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
 var EDGE_CHROMIUM_VERSION = "143.0.3650.75";
+// Since October 2026 the legacy host answers the synthesis WebSocket with 403
+// in every region — the voice catalog on that host still works, the socket
+// does not. This is the host Edge itself synthesizes through. See
+// docs/DESIGN.md §4.
 var EDGE_WSS_BASE =
-    "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1";
+    "wss://api.msedgeservices.com/tts/cognitiveservices/websocket/v1";
 var EDGE_OUTPUT_FORMAT = "audio-24khz-48kbitrate-mono-mp3";
 var EDGE_MAX_CHUNK_BYTES = 4096;
 
@@ -391,7 +395,10 @@ function _edgeSynthesizeChunk(escapedText, voiceShortName, prosody, CryptoJS) {
     return new Promise(function (resolve, reject) {
         var url =
             EDGE_WSS_BASE +
-            "?TrustedClientToken=" + EDGE_TRUSTED_CLIENT_TOKEN +
+            // The new host rejects the legacy `TrustedClientToken` parameter
+            // name; the same value is accepted under this one. Sec-MS-GEC and
+            // Sec-MS-GEC-Version are still required.
+            "?Ocp-Apim-Subscription-Key=" + EDGE_TRUSTED_CLIENT_TOKEN +
             "&ConnectionId=" + _edgeRandomHex(16, CryptoJS) +
             "&Sec-MS-GEC=" + _edgeSecMsGec(CryptoJS) +
             "&Sec-MS-GEC-Version=1-" + EDGE_CHROMIUM_VERSION;
